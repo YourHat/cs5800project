@@ -1,0 +1,234 @@
+import tkinter
+import time
+
+##############
+refer the corresponding extended FSM
+##############
+
+button_pushed = [0,0,0,0,0,0,0,0,0]  #[1st floor, 2nd floor,,,,,]
+
+class Floor(self): # keep track of the floor level
+  def __init__(self):
+    self.floor = 1
+
+  def moveup(self):
+    self.floor+=1
+
+  def movedown(self):
+    self.floor-=1
+
+  def floornum(self):
+    return self.floor
+  
+########################
+every state has get_state() to return state name
+set_next_state() to set next states()
+next() to move to the next states
+########################
+
+class State(): # every states' parerent class
+  def __init__(self,name):
+    self.name = name
+
+  def get_state(self):
+    return name
+
+  def set_next_state(self):
+    return
+
+  def next():
+    return
+
+class Idle(State): # idle state
+  self.moveup = Null
+  self.movedown = Null
+
+  def set_next_state(self,mu,md):
+    self.moveup = mu
+    self.movedown = md
+
+  def next():
+    if button_high():
+      return moveup
+    elif button_low():
+      return movedown
+    else:
+      return self
+
+
+class moveup(State): # move up state
+  self.arrive_u():
+  
+  def set_next_state(self, ar):
+    self.arrive_u = ar
+  
+  def next():
+    return arrive_u
+
+
+class movedown(State): #move down state
+  self.arrive_u = None:
+  
+  def set_next_state(self, ar):
+    self.arrive_d = ar
+  
+  def next():
+    return arrive_d
+
+class arrive_u(State): #arrive (moving up) state
+  self.moveup = None:
+  self.stop = None:
+
+  def set_next_state(self, mu, st):
+    self.moveup = mu
+    self.stop = st
+  
+  def next():
+    if button_pushed[c_floor()] == 1:
+      return self.stop
+    else:
+      return self.moveup
+      
+class arrive_d(State): #arrive (moving down) state
+  self.movedown = None:
+  self.stop = None:
+
+  def set_next_state(self, mu, st):
+    self.movedown = mu
+    self.stop = st
+  
+  def next():
+    if button_pushed[c_floor()] == 1:
+      return self.stop
+    else:
+      return self.movedown
+
+
+class stop_u(State): #stop state (up)
+  self.opendoor_u = Null:
+  
+  def set_next_state(self, odu):
+    self.opendoor = od
+  
+  def next():
+    return opendoor
+
+class stop_d(State): #stop state (down)
+  self.opendoor_d = none
+  
+  def set_next_state(self, odd):
+    self.opendoor_d = odd
+  
+  def next():
+    return opendoorclass stop_d(State):
+  self.opendoor_d = none
+
+
+class opendooru(State): open door state
+  self.closedoor_u = none
+  def set_next_state(self, cdu):
+    self.closedoor_u = cdu
+  
+  def next():
+    return closedoor_u
+
+
+class opendoord(State): o
+  self.closdoor_d = none
+  
+  def set_next_state(self, cdd):
+    self.closedoor_d = cdd
+  
+  def next():
+    return cloossefoor_d
+
+class closedoor_u(State):
+  self.opendoor_d = none
+  self.movedown = none
+  self.idle = none
+  self.moveup = none
+  
+  def set_next_state(self, cdd):
+    set all the states
+  
+  def next():
+    if more upperbutton:
+      moveup
+    elif no upperbutton and lowerbutton
+      movedown
+    elif openbutton pressed
+      opendoor
+    else:
+      idle
+
+class closedoor_d(State):
+  self.opendoor_d = none
+  self.movedown = none
+  self.idle = none
+  self.moveup = none
+  
+  def set_next_state(self, cdd):
+    set all the states
+  
+  def next():
+    if more upperbutton:
+      moveup
+    elif no upperbutton and lowerbutton
+      movedown
+    elif openbutton pressed
+      opendoor
+    else:
+      Idle
+
+
+def main()
+  #########initialize states###############
+  c_floor = Floor()
+  idle = Idle()
+  moveup = moveup()
+  movedown = movedown()
+  arriveup = arriveup()
+  arrivedown = arrivedown()
+  stopup = stopup()
+  stopdown = stopdown()
+  opendooru = opendooru()
+  oopendoord = opendoord()
+  closedoord = closedoor()
+  closefooru = cloosedooru()
+  ############################################
+  set next states for all the classes
+
+  current_s = idle #start state which is idle
+
+************
+
+create GUI here
+
+*************
+
+
+  while loop
+    idle.next()
+
+
+
+
+
+
+
+
+
+
+def button_high(floor):
+  if sum(button_pushed[floor.floornum():]) > 0:
+    return True
+
+def button_low(floor):
+  if sum(button_pushed[0:floor.floornum()]-1) > 0:
+    return True
+
+
+
+
+if __name__ == __main__:
+  main()
