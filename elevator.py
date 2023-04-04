@@ -6,10 +6,12 @@ from threading import *
 button_pushed = [0,0,0,0,0,0,0,0] # button for 1 ~ 8 floors
 power_on_off = False
 current_state = 0
-state_list = ["Idle","Move Up", "Move Down","Stop","Stop","Open Door","Open Door","Close Door","Close Door"]
+state_list = ["Idling ...","Moving Up ...", "Moving Down ...","Stoping ...","Stoping ...","Door Opening...","Door Opening...","Door Closing...","Door Closing..."]
 current_floor = 1
 movement = "idle"
 pow = False
+openq = False
+closeq = False
 
 def elevator():
     global t1    
@@ -23,7 +25,7 @@ def fsm():
     global canvas3, state_idel_c,state_md_c,state_mu_c
     global state_u_stop_c, state_u_open_c, state_u_close_c
     global state_d_stop_c, state_d_open_c, state_d_close_c
-
+    global openq, closeq
     while(True):
         if(power_on_off):
             if current_state == 0:
@@ -41,10 +43,10 @@ def fsm():
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
                     b_d[current_floor-1].configure(highlightbackground="WHITE")
                     current_state = 3
+                    button_pushed[current_floor-1] = 0
                     canvas3.itemconfig(state_mu_c, fill="WHITE")
                     canvas3.itemconfig(state_u_stop_c, fill= "ORANGE")
                 else:
-                    button_pushed[current_floor-1] = 0
                     current_floor+=1
             elif current_state == 2:
                 if button_pushed[current_floor-1] == 1:
@@ -52,10 +54,10 @@ def fsm():
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
                     b_d[current_floor-1].configure(highlightbackground="WHITE") 
                     current_state = 4
+                    button_pushed[current_floor-1] = 0
                     canvas3.itemconfig(state_md_c, fill="WHITE")
                     canvas3.itemconfig(state_d_stop_c, fill= "ORANGE")
                 else:
-                    button_pushed[current_floor-1] = 0
                     current_floor-=1
             elif current_state == 3:
                 time.sleep(1)
@@ -81,36 +83,53 @@ def fsm():
                 canvas3.itemconfig(state_d_close_c, fill= "ORANGE")
 
             elif current_state == 7:
-                if 1 in [x for x in button_pushed[current_floor:]]:
-                    current_state = 1
-                    current_floor+=1
+                openq = False
+                time.sleep(2)
+                if openq:
+                    current_state = 5
+                    openq = False
                     canvas3.itemconfig(state_u_close_c, fill="WHITE")
-                    canvas3.itemconfig(state_mu_c, fill= "ORANGE")
-                elif 1 in [x for x in button_pushed[:current_floor+1]]:
-                    current_state = 2
-                    current_floor-=1                    
-                    canvas3.itemconfig(state_u_close_c, fill="WHITE")
-                    canvas3.itemconfig(state_md_c, fill= "ORANGE")
+                    canvas3.itemconfig(state_u_open_c, fill= "ORANGE")
                 else:
-                    current_state = 0
-                    canvas3.itemconfig(state_u_close_c, fill="WHITE")
-                    canvas3.itemconfig(state_idel_c, fill= "ORANGE")
+                    if 1 in [x for x in button_pushed[current_floor:]]:
+                        current_state = 1
+                        current_floor+=1
+                        canvas3.itemconfig(state_u_close_c, fill="WHITE")
+                        canvas3.itemconfig(state_mu_c, fill= "ORANGE")
+                    elif 1 in [x for x in button_pushed[:current_floor+1]]:
+                        current_state = 2
+                        current_floor-=1                    
+                        canvas3.itemconfig(state_u_close_c, fill="WHITE")
+                        canvas3.itemconfig(state_md_c, fill= "ORANGE")
+                    else:
+                        current_state = 0
+                        canvas3.itemconfig(state_u_close_c, fill="WHITE")
+                        canvas3.itemconfig(state_idel_c, fill= "ORANGE")
 
             elif current_state == 8:
-                if 1 in [x for x in button_pushed[:current_floor+1]]:
-                    current_state = 2
-                    current_floor-=1
+                openq = False
+                time.sleep(2)
+                if openq:
+                    current_state = 6
+                    openq = False
                     canvas3.itemconfig(state_d_close_c, fill="WHITE")
-                    canvas3.itemconfig(state_md_c, fill= "ORANGE")
-                elif 1 in [x for x in button_pushed[current_floor:]]:
-                    current_state = 1
-                    current_floor+=1                    
-                    canvas3.itemconfig(state_d_close_c, fill="WHITE")
-                    canvas3.itemconfig(state_mu_c, fill= "ORANGE")
+                    canvas3.itemconfig(state_d_open_c, fill= "ORANGE")
                 else:
-                    current_state = 0
-                    canvas3.itemconfig(state_d_close_c, fill="WHITE")
-                    canvas3.itemconfig(state_idel_c, fill= "ORANGE")
+                    if 1 in [x for x in button_pushed[:current_floor+1]]:
+                        current_state = 2
+                        current_floor-=1
+                        canvas3.itemconfig(state_d_close_c, fill="WHITE")
+                        canvas3.itemconfig(state_md_c, fill= "ORANGE")
+                    elif 1 in [x for x in button_pushed[current_floor:]]:
+                        current_state = 1
+                        current_floor+=1                    
+                        canvas3.itemconfig(state_d_close_c, fill="WHITE")
+                        canvas3.itemconfig(state_mu_c, fill= "ORANGE")
+                    else:
+                        current_state = 0
+                        canvas3.itemconfig(state_d_close_c, fill="WHITE")
+                        canvas3.itemconfig(state_idel_c, fill= "ORANGE")
+
 
 
             print(button_pushed)
@@ -120,6 +139,13 @@ def fsm():
             time.sleep(1)
         
 
+def opend():
+    global openq
+    openq = True
+
+def closed():
+    global closeq
+    closeq = True
     
 
 def press_button(arg,bk):
@@ -139,15 +165,16 @@ def onof():
     if(not power_on_off):
         power_on_off = True
         bof.configure(highlightbackground="GREEN")
-    else:
+    elif all(x == 0 for x in button_pushed) and current_state == 0:
         power_on_off = False
         bof.configure(highlightbackground="RED")
+        label_1.configure(text = "Power Off ...")
 
 def create_gui():
     global current_state, state_list, button_pushed, moveu, label_1, label_floor 
     #main window
     window = tk.Tk()
-    window.config(bg = "GRAY")
+    window.config(bg = "#80471C")
     window.geometry("1400x800")
     window.title("elevator simulator")
 
@@ -228,10 +255,10 @@ def create_gui():
     b6 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "6", command = lambda: press_button(6,0))
     b7 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "7", command = lambda: press_button(7,0))
     b8 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "8", command = lambda: press_button(8,0))
-    bo = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =5, text = "<>")
-    bc = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =5, text = "><")
+    bo = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =5, text = "<>", command = opend)
+    bc = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =5, text = "><", command = closed)
     bof = tk.Button(window, pady = 15, highlightbackground="RED",padx =5, text = "power", command = onof)
-    label_1 = tk.Label(window, width= 30, padx = 65, pady = 5, text = "Power off ...", anchor=tk.W)
+    label_1 = tk.Label(window, width= 20, padx = 50, pady = 5, font = ("Arial", 26),text = "Power Off ...", anchor=tk.W)
     label_floor = tk.Label(window, padx = 10, pady = 10,  font=("Arial", 32), text = "1", anchor=tk.W)
 
     canvas2.create_window(430,490, anchor=tk.W, window=b1)
@@ -258,13 +285,13 @@ def create_gui():
    
     state_idel_c = canvas3.create_oval(200,20,300,80, outline = "black", fill = "Orange", width = 2)
     state_md_c = canvas3.create_oval(80,120,180,180, outline = "black", fill = "WHITE", width = 2)
-    state_d_stop_c = canvas3.create_oval(80,320,180,380, outline = "black", fill = "WHITE", width = 2)
-    state_d_open_c = canvas3.create_oval(80,420,180,480, outline = "black", fill = "WHITE", width = 2)
-    state_d_close_c = canvas3.create_oval(80,520,180,580, outline = "black", fill = "WHITE", width = 2)
+    state_d_stop_c = canvas3.create_oval(80,240,180,300, outline = "black", fill = "WHITE", width = 2)
+    state_d_open_c = canvas3.create_oval(80,360,180,420, outline = "black", fill = "WHITE", width = 2)
+    state_d_close_c = canvas3.create_oval(80,480,180,540, outline = "black", fill = "WHITE", width = 2)
     state_mu_c = canvas3.create_oval(320,120,420,180, outline = "black", fill = "WHITE", width = 2)
-    state_u_stop_c = canvas3.create_oval(320,320,420,380, outline = "black", fill = "WHITE", width = 2)
-    state_u_open_c = canvas3.create_oval(320,420,420,480, outline = "black", fill = "WHITE", width = 2)
-    state_u_close_c = canvas3.create_oval(320,520,420,580, outline = "black", fill = "WHITE", width = 2)
+    state_u_stop_c = canvas3.create_oval(320,240,420,300, outline = "black", fill = "WHITE", width = 2)
+    state_u_open_c = canvas3.create_oval(320,360,420,420, outline = "black", fill = "WHITE", width = 2)
+    state_u_close_c = canvas3.create_oval(320,480,420,540, outline = "black", fill = "WHITE", width = 2)
 
     label_idle = tk.Label(window, text = "Idle", fg= "black", bg = "WHITE", anchor=tk.W)
     label_md = tk.Label(window, text = "Move Down", fg = "black",bg = "WHITE", anchor=tk.W)
@@ -279,14 +306,84 @@ def create_gui():
     canvas3.create_window(240,40, anchor=tk.NW, window=label_idle)
     canvas3.create_window(95,140, anchor=tk.NW, window=label_md)
     canvas3.create_window(340,140, anchor=tk.NW, window=label_mu)
-    canvas3.create_window(95,340, anchor=tk.NW, window=label_d_stop)
-    canvas3.create_window(95,440, anchor=tk.NW, window=label_d_open)
-    canvas3.create_window(95,540, anchor=tk.NW, window=label_d_close)
-    canvas3.create_window(340,340, anchor=tk.NW, window=label_u_stop)
-    canvas3.create_window(340,440, anchor=tk.NW, window=label_u_open)
-    canvas3.create_window(340,540, anchor=tk.NW, window=label_u_close)
+    canvas3.create_window(95,260, anchor=tk.NW, window=label_d_stop)
+    canvas3.create_window(95,380, anchor=tk.NW, window=label_d_open)
+    canvas3.create_window(95,500, anchor=tk.NW, window=label_d_close)
+    canvas3.create_window(340,260, anchor=tk.NW, window=label_u_stop)
+    canvas3.create_window(340,380, anchor=tk.NW, window=label_u_open)
+    canvas3.create_window(340,500, anchor=tk.NW, window=label_u_close)
 
 
+
+    inp_re_hi_i= tk.Label(window, text = "Request From\n Higher Floor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_re_hi_u= tk.Label(window, text = "Request From\n Higher Floor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_re_cu_u= tk.Label(window, text = "Request From\n Current Floor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_stop_u= tk.Label(window, text = "Completely\n Stop", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_open_u= tk.Label(window, text = "Wait For\n 2 Seconds\n/Close Button\nPressed", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_close_u= tk.Label(window, text = "Open\nButton\nPressed", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_re_hi_u_c= tk.Label(window, text = "Request\nFrom\nHigher\nFloor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+
+    inp_re_lo_i= tk.Label(window, text = "Request From\n Lower Floor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_re_lo_d= tk.Label(window, text = "Request From\n Lower Floor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_re_cu_d= tk.Label(window, text = "Request From\n Current Floor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_stop_d= tk.Label(window, text = "Completely\n Stop", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_open_d= tk.Label(window, text = "Wait For\n 2 Seconds\n/Close Button\nPressed", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_close_d= tk.Label(window, text = "Open\nButton\nPressed", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_re_lo_d_c= tk.Label(window, text = "Request\nFrom\nLower\nFloor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+
+    inp_noreq_u= tk.Label(window, text = "No\nRequest", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_noreq_d= tk.Label(window, text = "No\nRequest", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_nohi_lo= tk.Label(window, text = "Request\nFrom\nLower\nFloor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+    inp_nolo_hi= tk.Label(window, text = "Request\nFrom\nHigher\nFloor", font= ("Arial",10), fg= "black", bg = "WHITE", anchor=tk.W)
+
+
+    canvas3.create_window(330,50, anchor=tk.NW, window=inp_re_hi_i)
+    canvas3.create_window(430,70, anchor=tk.NW, window=inp_re_hi_u)
+    canvas3.create_window(340,190, anchor=tk.NW, window=inp_re_cu_u)
+    canvas3.create_window(340,315, anchor=tk.NW, window=inp_stop_u)
+    canvas3.create_window(335,425, anchor=tk.NW, window=inp_open_u)
+    canvas3.create_window(415,430, anchor=tk.NW, window=inp_close_u) 
+    canvas3.create_window(445,160, anchor=tk.NW, window=inp_re_hi_u_c)
+
+    canvas3.create_window(110,50, anchor=tk.NW, window=inp_re_lo_i)
+    canvas3.create_window(20,70, anchor=tk.NW, window=inp_re_lo_d)
+    canvas3.create_window(110,190, anchor=tk.NW, window=inp_re_cu_d)
+    canvas3.create_window(110,315, anchor=tk.NW, window=inp_stop_d)
+    canvas3.create_window(20,425, anchor=tk.NW, window=inp_open_d)
+    canvas3.create_window(110,430, anchor=tk.NW, window=inp_close_d) 
+    canvas3.create_window(10,160, anchor=tk.NW, window=inp_re_lo_d_c)
+
+    canvas3.create_window(180,100, anchor=tk.NW, window=inp_noreq_u)
+    canvas3.create_window(280,100, anchor=tk.NW, window=inp_noreq_d)
+    canvas3.create_window(200,450, anchor=tk.NW, window=inp_nohi_lo) 
+    canvas3.create_window(260,450, anchor=tk.NW, window=inp_nolo_hi)
+
+
+    # ARROWS
+    canvas3.create_line(310,60,360,110, fill="black", arrow=tk.LAST)
+    canvas3.create_line(330,180,330,240, fill="black", arrow=tk.LAST)
+    canvas3.create_line(330,300,330,360, fill="black", arrow=tk.LAST)
+    canvas3.create_line(330,420,330,480, fill="black", arrow=tk.LAST)
+    canvas3.create_line(410,480,410,420, fill="black", arrow=tk.LAST)
+    canvas3.create_line(190,60,140,110, fill="black", arrow=tk.LAST)
+    canvas3.create_line(90,180,90,240, fill="black", arrow=tk.LAST)
+    canvas3.create_line(90,300,90,360, fill="black", arrow=tk.LAST)
+    canvas3.create_line(90,420,90,480, fill="black", arrow=tk.LAST)
+    canvas3.create_line(170,480,170,420, fill="black", arrow=tk.LAST)
+    canvas3.create_line(250,5,250,20, fill="black", arrow=tk.LAST)
+    canvas3.create_line(180,480,240,90, fill="black", arrow=tk.LAST)
+    canvas3.create_line(180,480,320,160, fill="black", arrow=tk.LAST)
+    canvas3.create_line(320,480,260,90, fill="black", arrow=tk.LAST)
+    canvas3.create_line(320,480,180,160, fill="black", arrow=tk.LAST)
+
+    ########################
+    # gets error but works #
+    ########################
+    #curved arrow
+    canvas3.create_line(70,500,0,400,70,160, fill = "black", arrow = tk.LAST, smooth="true")
+    canvas3.create_line(430,500,500,400,430,160, fill = "black", arrow = tk.LAST, smooth="true")
+    canvas3.create_line(70,140,0,100,90,120, fill = "black", arrow = tk.LAST, smooth="true")
+    canvas3.create_line(430,140,500,100,410,120, fill = "black", arrow = tk.LAST, smooth="true")
     # organize and pack
     frame_title.grid(row = 0, column =0, columnspan = 3, sticky="snew")
     canvas1.grid(row = 1, column = 0, sticky="")
