@@ -1,0 +1,27 @@
+
+
+input is going to be button inputs for floors and doors
+
+expected outcomes are all the change for FSM
+
+EXAMPLES
+- button pressed while power is off
+	Stay in power off state
+
+-5 in elevator was pressed while Idle on 2nd floor
+	Idle -> Move Up -> Move Up -> Move Up -> Stop -> Open Door -> Close Door -> Idle
+
+-Up Button on 4th Floor was pressed while Idle on 6th floor
+	Idle -> Move Down -> Move Down -> Stop -> Open Door -> Close Door -> Idle
+
+- Open Button pressed While on Close Door State
+	Close Door -> Open Door
+
+- Close Button Pressed While on Open Door State
+	Open Door -> Close Door
+
+- 2 in elevator was pressed, and 4, 6 button were already pressed while Idle on 3rd floor
+	Idle -> Move up -> Move Up -> Stop -> Open Door -> Close Door -> 
+	Move Up -> Move Up -> Stop -> Open Door -> Close Door -> Move Down -> 
+	Move Down -> Move Down -> Move Down -> Stop -> Open Door -> Close Door -> Idle
+

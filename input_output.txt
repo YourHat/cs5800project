@@ -1,0 +1,7 @@
+
+
+input is going to be button inputs for floors and doors
+
+expected outcomes are all the change for FSM
+
+NO - EXAMPLE
