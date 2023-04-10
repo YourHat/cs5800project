@@ -5,28 +5,33 @@ from threading import *
 
 button_pushed = [0,0,0,0,0,0,0,0] # button for 1 ~ 8 floors
 power_on_off = False
-current_state = 0
+current_state = 0 #first state
 state_list = ["Idling ...","Moving Up ...", "Moving Down ...","Stoping ...","Stoping ...","Door Opening...","Door Opening...","Door Closing...","Door Closing..."]
-current_floor = 1
-movement = "idle"
-pow = False
-openq = False
-closeq = False
+current_floor = 1 #first floor
+openq = False #change to True if open door button is pressed
+closeq = False #chage to True if close door button is pressed
 
 def elevator():
+    """
+    called when the program is run
+    """
     global t1    
     t1 = Thread(target = fsm)
-    t1.start()
-    create_gui() 
+    t1.start() #start the thread - fsm() function
+    create_gui() #create GUI
 
 
 def fsm():
-    global current_state, state_list, button_pushed, movement, current_floor,label_1,label_floor
+    """
+    Finite State Machine
+    """
+    global current_state, state_list, button_pushed,  current_floor,label_1,label_floor
     global canvas3, state_idel_c,state_md_c,state_mu_c
     global state_u_stop_c, state_u_open_c, state_u_close_c
     global state_d_stop_c, state_d_open_c, state_d_close_c
     global openq, closeq
-    time.sleep(1)
+    time.sleep(1) #wait for GUI to be created
+    #disable all the buttons
     b1["state"] = "disabled"
     b2["state"] = "disabled"
     b3["state"] = "disabled"
@@ -41,16 +46,17 @@ def fsm():
         button["state"] = "disabled"
     for button in b_d:
         button["state"] = "disabled"
-
+    #start FSM
     while(True):
         if(power_on_off):
-            if current_state == 0:
-                button_pushed[current_floor-1] = 0
-                b_l[current_floor-1].configure(highlightbackground="WHITE")
-                b_u[current_floor-1].configure(highlightbackground="WHITE")
-                b_d[current_floor-1].configure(highlightbackground="WHITE")
+            if not current_state == 1 and not current_state == 2: # if button for the floor that evelator is at, ignore it
+                if button_pushed[current_floor-1] == 1:
+                    button_pushed[current_floor-1] = 0
+                    b_l[current_floor-1].configure(highlightbackground="WHITE")
+                    b_u[current_floor-1].configure(highlightbackground="WHITE")
+                    b_d[current_floor-1].configure(highlightbackground="WHITE")
 
-
+            if current_state == 0: #state - idle
                 if 1 in [x for x in button_pushed[current_floor:]]:
                     current_state = 1
                     canvas3.itemconfig(state_idel_c, fill="WHITE")
@@ -59,7 +65,8 @@ def fsm():
                     current_state = 2
                     canvas3.itemconfig(state_idel_c, fill="WHITE")
                     canvas3.itemconfig(state_md_c, fill= "ORANGE")
-            elif current_state == 1:
+
+            elif current_state == 1: # state - moving up
                 if button_pushed[current_floor-1] == 1:
                     b_l[current_floor-1].configure(highlightbackground="WHITE")
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
@@ -70,7 +77,8 @@ def fsm():
                     canvas3.itemconfig(state_u_stop_c, fill= "ORANGE")
                 else:
                     current_floor+=1
-            elif current_state == 2:
+
+            elif current_state == 2: #state - moving down
                 if button_pushed[current_floor-1] == 1:
                     b_l[current_floor-1].configure(highlightbackground="WHITE")
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
@@ -81,18 +89,20 @@ def fsm():
                     canvas3.itemconfig(state_d_stop_c, fill= "ORANGE")
                 else:
                     current_floor-=1
-            elif current_state == 3:
+
+            elif current_state == 3: # state - stopping
                 time.sleep(1)
                 current_state = 5
                 canvas3.itemconfig(state_u_stop_c, fill="WHITE")
                 canvas3.itemconfig(state_u_open_c, fill= "ORANGE")
-            elif current_state == 4:
+
+            elif current_state == 4: #state - stopping
                 time.sleep(1)
                 current_state = 6
                 canvas3.itemconfig(state_d_stop_c, fill="WHITE")
                 canvas3.itemconfig(state_d_open_c, fill= "ORANGE")
 
-            elif current_state == 5:
+            elif current_state == 5: # state - opening door
                 closeq = False
                 for time_spent in range(3):
                     if closeq:
@@ -103,7 +113,7 @@ def fsm():
                 canvas3.itemconfig(state_u_open_c, fill= "WHITE")
                 closeq = False
 
-            elif current_state == 6:
+            elif current_state == 6: # state - opening door
                 closeq = False
                 for time_spent in range(3):
                     if closeq:
@@ -115,7 +125,7 @@ def fsm():
                         
                 closeq = False
 
-            elif current_state == 7:
+            elif current_state == 7: # state - closing door
                 openq = False
                 for time_spent in range(3):
                     if openq:
@@ -144,7 +154,7 @@ def fsm():
                 else:
                     openq = False
 
-            elif current_state == 8:
+            elif current_state == 8:# state - closing door
                 openq = False
                 for time_spent in range(3):
                     if openq:
@@ -174,26 +184,33 @@ def fsm():
                     openq = False
                 
 
-
-            print(button_pushed)
-            print(current_floor)
+            #change the labels in GUI
             label_1.configure(text=state_list[current_state])
             label_floor.configure(text = current_floor)
             time.sleep(1)
         
 
 def opend():
+    """
+    if open button is pressed, change the openq value to True
+    """
     global openq
     openq = True
 
 def closed():
+    """
+    if close button is pressed, change the closeq value to True
+    """
     global closeq
     closeq = True
     
 
 def press_button(arg,bk):
+    """
+    when a button for a floor is pressed, change the corresponging value for the floor
+    change the background color of the button to pink too
+    """
     global button_pushed
-    
     button_pushed[arg-1] = 1
     match bk:
         case 0:
@@ -204,6 +221,11 @@ def press_button(arg,bk):
             b_d[arg-1].configure(highlightbackground="PINK")
 
 def onof():
+    """
+    when power button is pressed
+        on -> enable all the buttons, change the state to idle from power off
+        off -> disable all the buttons, change the state to power off from idle
+    """
     global power_on_off
     if(not power_on_off):
         power_on_off = True
@@ -225,8 +247,6 @@ def onof():
         canvas3.itemconfig(state_power, fill="WHITE")
         canvas3.itemconfig(state_idel_c, fill="ORANGE")
 
-
-
     elif all(x == 0 for x in button_pushed) and current_state == 0:
         power_on_off = False
         bof.configure(highlightbackground="RED")
@@ -245,18 +265,13 @@ def onof():
             button["state"] = "disabled"
         for button in b_d:
             button["state"] = "disabled"
-
         canvas3.itemconfig(state_power, fill="ORANGE")
         canvas3.itemconfig(state_idel_c, fill="WHITE")
 
-
-
-
-
-
-
-
 def create_gui():
+    """
+    Create GUI for this program
+    """
     global current_state, state_list, button_pushed, moveu, label_1, label_floor 
     #main window
     window = tk.Tk()
@@ -474,14 +489,18 @@ def create_gui():
     canvas3.create_line(320,480,260,90, fill="black", arrow=tk.LAST)
     canvas3.create_line(320,480,180,160, fill="black", arrow=tk.LAST)
 
-    ########################
-    # gets error but works #
-    ########################
+    ##################################
+    # gets error but works from here #
+    ##################################
     #curved arrow
     canvas3.create_line(70,500,0,400,70,160, fill = "black", arrow = tk.LAST, smooth="true")
     canvas3.create_line(430,500,500,400,430,160, fill = "black", arrow = tk.LAST, smooth="true")
     canvas3.create_line(70,140,0,100,90,120, fill = "black", arrow = tk.LAST, smooth="true")
     canvas3.create_line(430,140,500,100,410,120, fill = "black", arrow = tk.LAST, smooth="true")
+    ###################################
+    # gets error but works until here #
+    ###################################
+
     # organize and pack
     frame_title.grid(row = 0, column =0, columnspan = 3, sticky="snew")
     canvas1.grid(row = 1, column = 0, sticky="")
