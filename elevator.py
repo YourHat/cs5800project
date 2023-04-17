@@ -1,21 +1,27 @@
 import time
 import tkinter as tk
 from threading import *
+import sys
 
 
-button_pushed = [0,0,0,0,0,0,0,0] # button for 1 ~ 8 floors
+button_pushed = [0,0] # button for 1 ~ 8 floors
 power_on_off = False
 current_state = 0 #first state
 state_list = ["Idling ...","Moving Up ...", "Moving Down ...","Stoping ...","Stoping ...","Door Opening...","Door Opening...","Door Closing...","Door Closing..."]
 current_floor = 1 #first floor
 openq = False #change to True if open door button is pressed
 closeq = False #chage to True if close door button is pressed
+floor_num = 0
 
-def elevator():
+def elevator(arg):
     """
     called when the program is run
     """
-    global t1    
+    global t1, button_pushed, floor_num
+    button_pushed = []
+    floor_num = int(arg[1])
+    for i in range(floor_num):
+        button_pushed.append(0)
     t1 = Thread(target = fsm)
     t1.start() #start the thread - fsm() function
     create_gui() #create GUI
@@ -32,20 +38,29 @@ def fsm():
     global openq, closeq
     time.sleep(1) #wait for GUI to be created
     #disable all the buttons
-    b1["state"] = "disabled"
-    b2["state"] = "disabled"
-    b3["state"] = "disabled"
-    b4["state"] = "disabled"
-    b5["state"] = "disabled"
-    b6["state"] = "disabled"
-    b7["state"] = "disabled"
-    b8["state"] = "disabled"
+    if floor_num > 0:
+        b1["state"] = "disable"
+    if floor_num > 1:
+        b2["state"] = "disable"
+    if floor_num > 2:
+        b3["state"] = "disable"
+    if floor_num > 3:
+        b4["state"] = "disable"        
+    if floor_num > 4:
+        b5["state"] = "disable"        
+    if floor_num > 5:
+        b6["state"] = "disable"        
+    if floor_num > 6:
+        b7["state"] = "disable"      
+    if floor_num > 7:
+        b8["state"] = "disable"
     bo["state"] = "disabled"
     bc["state"] = "disabled"
-    for button in b_u:
-        button["state"] = "disabled"
-    for button in b_d:
-        button["state"] = "disabled"
+
+    for b in range(7):
+        b_u[b]["state"] = "disabled"
+    for b in range(7):
+        b_d[b]["state"] = "disabled"
     #start FSM
     while(True):
         if(power_on_off):
@@ -171,7 +186,7 @@ def fsm():
                         current_floor-=1
                         canvas3.itemconfig(state_d_close_c, fill="WHITE")
                         canvas3.itemconfig(state_md_c, fill= "ORANGE")
-                    elif 1 in [x for x in button_pushed[current_floor:]]:
+                    elif 1 in [x for x in button_pushed[current_floor + 1:]]:
                         current_state = 1
                         current_floor+=1                    
                         canvas3.itemconfig(state_d_close_c, fill="WHITE")
@@ -230,20 +245,30 @@ def onof():
     if(not power_on_off):
         power_on_off = True
         bof.configure(highlightbackground="GREEN")
-        b1["state"] = "normal"
-        b2["state"] = "normal"
-        b3["state"] = "normal"
-        b4["state"] = "normal"
-        b5["state"] = "normal"
-        b6["state"] = "normal"
-        b7["state"] = "normal"
-        b8["state"] = "normal"
+        if floor_num > 0:
+            b1["state"] = "normal"
+        if floor_num > 1:
+            b2["state"] = "normal"
+        if floor_num > 2:
+            b3["state"] = "normal"
+        if floor_num > 3:
+            b4["state"] = "normal"        
+        if floor_num > 4:
+            b5["state"] = "normal"        
+        if floor_num > 5:
+            b6["state"] = "normal"        
+        if floor_num > 6:
+            b7["state"] = "normal"      
+        if floor_num > 7:
+            b8["state"] = "normal"
+
         bo["state"] = "normal"
         bc["state"] = "normal"
-        for button in b_u:
-            button["state"] = "normal"
-        for button in b_d:
-            button["state"] = "normal"
+
+        for b in range(floor_num-1):
+            b_u[b]["state"] = "normal"
+        for b in range(1, floor_num):
+            b_d[b]["state"] = "normal"
         canvas3.itemconfig(state_power, fill="WHITE")
         canvas3.itemconfig(state_idel_c, fill="ORANGE")
 
@@ -251,20 +276,30 @@ def onof():
         power_on_off = False
         bof.configure(highlightbackground="RED")
         label_1.configure(text = "Power Off ...")
-        b1["state"] = "disabled"
-        b2["state"] = "disabled"
-        b3["state"] = "disabled"
-        b4["state"] = "disabled"
-        b5["state"] = "disabled"
-        b6["state"] = "disabled"
-        b7["state"] = "disabled"
-        b8["state"] = "disabled"
+    
+        if floor_num > 0:
+            b1["state"] = "disable"
+        if floor_num > 1:
+            b2["state"] = "disable"
+        if floor_num > 2:
+            b3["state"] = "disable"
+        if floor_num > 3:
+            b4["state"] = "disable"        
+        if floor_num > 4:
+            b5["state"] = "disable"        
+        if floor_num > 5:
+            b6["state"] = "disable"        
+        if floor_num > 6:
+            b7["state"] = "disable"      
+        if floor_num > 7:
+            b8["state"] = "disable"
+
         bo["state"] = "disabled"
         bc["state"] = "disabled"
-        for button in b_u:
-            button["state"] = "disabled"
-        for button in b_d:
-            button["state"] = "disabled"
+        for b in range(floor_num -1):
+            b_u[b]["state"] = "disable"
+        for b in range(1,floor_num):
+            b_d[b]["state"] = "disable"
         canvas3.itemconfig(state_power, fill="ORANGE")
         canvas3.itemconfig(state_idel_c, fill="WHITE")
 
@@ -289,95 +324,211 @@ def create_gui():
     #floor buttons
     canvas1 = tk.Canvas(window,bg = "WHITE", width= 150, height=600)
 
-    b1u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(1,1))
-    #b1d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(1,2))
-    b2u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(2,1))
-    b2d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(2,2))
-    b3u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(3,1))
-    b3d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(3,2))
-    b4u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(4,1))
-    b4d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(4,2))
-    b5u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(5,1))
-    b5d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(5,2))
-    b6u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(6,1))
-    b6d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(6,2))
-    b7u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(7,1))
-    b7d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(7,2))
-    #b8u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(8,1))
-    b8d = tk.Button(window,highlightbackground="WHITE", text = "\u25BC", command = lambda: press_button(8,2))
-    label_1st = tk.Label(window, padx = 7, pady = 17, text = "1", anchor=tk.W)
-    label_2st = tk.Label(window, padx = 6, pady = 17, text = "2", anchor=tk.W)
-    label_3st = tk.Label(window, padx = 5, pady = 17, text = "3", anchor=tk.W)
-    label_4st = tk.Label(window, padx = 5, pady = 17, text = "4", anchor=tk.W)
-    label_5st = tk.Label(window, padx = 6, pady = 17, text = "5", anchor=tk.W)
-    label_6st = tk.Label(window, padx = 5, pady = 17, text = "6", anchor=tk.W)
-    label_7st = tk.Label(window, padx = 6, pady = 17, text = "7", anchor=tk.W)
-    label_8st = tk.Label(window, padx = 5, pady = 17, text = "8", anchor=tk.W)
+
+
+
+
+
+
+
+
+
+
+  
+
+
+   
+
+
+    if floor_num > 0:
+        b1u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(1,1))    
+        b1d = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(1,2))    
+        label_1st = tk.Label(window, padx = 7, pady = 17, text = "1", anchor=tk.W)
+        canvas1.create_window(73,518, anchor=tk.W, window=b1u)        
+        canvas1.create_window(73,544, anchor=tk.W, window=b1d)
+        canvas1.create_window(50,531, anchor=tk.W, window=label_1st)
+    if floor_num > 1:
+        b2u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(2,1))
+        b2d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(2,2))
+        label_2st = tk.Label(window, padx = 6, pady = 17, text = "2", anchor=tk.W)
+        canvas1.create_window(73,448, anchor=tk.W, window=b2u)
+        canvas1.create_window(73,474, anchor=tk.W, window=b2d)  
+        canvas1.create_window(50,461, anchor=tk.W, window=label_2st)
+    if floor_num > 2:
+        label_3st = tk.Label(window, padx = 5, pady = 17, text = "3", anchor=tk.W)
+        b3u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(3,1))
+        b3d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(3,2))
+        canvas1.create_window(73,378, anchor=tk.W, window=b3u)
+        canvas1.create_window(73,404, anchor=tk.W, window=b3d)
+        canvas1.create_window(50,391, anchor=tk.W, window=label_3st)
+
+    if floor_num > 3:
+        b4u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(4,1))
+        b4d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(4,2))
+        label_4st = tk.Label(window, padx = 5, pady = 17, text = "4", anchor=tk.W)
+
+
+        canvas1.create_window(73,308, anchor=tk.W, window=b4u)
+        canvas1.create_window(73,334, anchor=tk.W, window=b4d)
+        canvas1.create_window(50,321, anchor=tk.W, window=label_4st)
+
+
+
+    if floor_num > 4:
+
+        b5u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(5,1))
+        b5d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(5,2))
+
+        label_5st = tk.Label(window, padx = 6, pady = 17, text = "5", anchor=tk.W)
+        canvas1.create_window(73,238, anchor=tk.W, window=b5u)
+        canvas1.create_window(73,264, anchor=tk.W, window=b5d)
+        canvas1.create_window(50,251, anchor=tk.W, window=label_5st)
+    if floor_num > 5:
+
+        b6u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(6,1))
+        b6d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(6,2))
+        label_6st = tk.Label(window, padx = 5, pady = 17, text = "6", anchor=tk.W)
+        canvas1.create_window(73,168, anchor=tk.W, window=b6u)
+        canvas1.create_window(73,194, anchor=tk.W, window=b6d)
+        canvas1.create_window(50,181, anchor=tk.W, window=label_6st)
+
+    if floor_num > 6:
+
+        b7u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(7,1))
+        b7d = tk.Button(window, highlightbackground="WHITE",text = "\u25BC", command = lambda: press_button(7,2))
+        label_7st = tk.Label(window, padx = 6, pady = 17, text = "7", anchor=tk.W)
+        canvas1.create_window(73,98, anchor=tk.W, window=b7u)
+        canvas1.create_window(73,124, anchor=tk.W, window=b7d)
+        canvas1.create_window(50,111, anchor=tk.W, window=label_7st)
+    if floor_num > 7:
     
+        b8u = tk.Button(window, highlightbackground="WHITE",text = "\u25B2", command = lambda: press_button(8,1))
+        b8d = tk.Button(window,highlightbackground="WHITE", text = "\u25BC", command = lambda: press_button(8,2))
+        label_8st = tk.Label(window, padx = 5, pady = 17, text = "8", anchor=tk.W)
+        canvas1.create_window(73,28, anchor=tk.W, window=b8u)
+        canvas1.create_window(73,54, anchor=tk.W, window=b8d)
+        canvas1.create_window(50,41, anchor=tk.W, window=label_8st)
+
     global b_u, b_d
-    b_u = [b1u,b2u,b3u,b4u,b5u,b6u,b7u]
-    b_d = [b2d,b3d,b4d,b5d,b6d,b7d,b8d]
+
+    if floor_num > 0:
+        b_u = [b1u]        
+        b_d = [b1d]
+    if floor_num > 1:
+        b_u = [b1u,b2u]       
+        b_d = [b1d,b2d]
+
+    if floor_num > 2:
+        b_u = [b1u,b2u,b3u]      
+        b_d = [b1d,b2d,b3d]
+    if floor_num > 3:
+        b_u = [b1u,b2u,b3u,b4u]       
+        b_d = [b1d,b2d,b3d,b4d]
+    if floor_num > 4:
+        b_u = [b1u,b2u,b3u,b4u,b5u]       
+        b_d = [b1d,b2d,b3d,b4d,b5d]
+    if floor_num > 5:
+        b_u = [b1u,b2u,b3u,b4u,b5u,b6u]       
+        b_d = [b1d,b2d,b3d,b4d,b5d,b6d]
+    if floor_num > 6:
+        b_u = [b1u,b2u,b3u,b4u,b5u,b6u,b7u]    
+        b_d = [b1d,b2d,b3d,b4d,b5d,b6d,b7d]
+    if floor_num > 7:
+        b_u = [b1u,b2u,b3u,b4u,b5u,b6u,b7u,b8u]     
+        b_d = [b1d,b2d,b3d,b4d,b5d,b6d,b7d,b8d]
 
 
-    canvas1.create_window(73,518, anchor=tk.W, window=b1u)
-    #canvas1.create_window(73,544, anchor=tk.W, window=b1d)
-    canvas1.create_window(50,531, anchor=tk.W, window=label_1st)
-    canvas1.create_window(73,448, anchor=tk.W, window=b2u)
-    canvas1.create_window(73,474, anchor=tk.W, window=b2d)
-    canvas1.create_window(50,461, anchor=tk.W, window=label_2st)
-    canvas1.create_window(73,378, anchor=tk.W, window=b3u)
-    canvas1.create_window(73,404, anchor=tk.W, window=b3d)
-    canvas1.create_window(50,391, anchor=tk.W, window=label_3st)
-    canvas1.create_window(73,308, anchor=tk.W, window=b4u)
-    canvas1.create_window(73,334, anchor=tk.W, window=b4d)
-    canvas1.create_window(50,321, anchor=tk.W, window=label_4st)
-    canvas1.create_window(73,238, anchor=tk.W, window=b5u)
-    canvas1.create_window(73,264, anchor=tk.W, window=b5d)
-    canvas1.create_window(50,251, anchor=tk.W, window=label_5st)
-    canvas1.create_window(73,168, anchor=tk.W, window=b6u)
-    canvas1.create_window(73,194, anchor=tk.W, window=b6d)
-    canvas1.create_window(50,181, anchor=tk.W, window=label_6st)
-    canvas1.create_window(73,98, anchor=tk.W, window=b7u)
-    canvas1.create_window(73,124, anchor=tk.W, window=b7d)
-    canvas1.create_window(50,111, anchor=tk.W, window=label_7st)
-    #canvas1.create_window(73,28, anchor=tk.W, window=b8u)
-    canvas1.create_window(73,54, anchor=tk.W, window=b8d)
-    canvas1.create_window(50,41, anchor=tk.W, window=label_8st)
+  
+
+
+  
+
+
+
+
 
     #elevator
     global canvas2, b1, b2, b3, b4, b5, b6, b7, b8,bof, bc, bo
     canvas2 = tk.Canvas(window,bg = "WHITE", width= 500, height=600)
 
-    b1 = tk.Button(window, pady= 15, highlightbackground="WHITE",padx = 10, text = "1", command = lambda: press_button(1,0))
-    b2 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx = 10,text = "2", command = lambda: press_button(2,0))
-    b3 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx = 10, text = "3", command = lambda: press_button(3,0))
-    b4 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx = 10, text = "4", command = lambda: press_button(4,0))
-    b5 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "5", command = lambda: press_button(5,0))
-    b6 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "6", command = lambda: press_button(6,0))
-    b7 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "7", command = lambda: press_button(7,0))
-    b8 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "8", command = lambda: press_button(8,0))
+
+    
+
+
+
+
+
+
+
+
     bo = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =5, text = "<>", command = opend)
     bc = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =5, text = "><", command = closed)
     bof = tk.Button(window, pady = 15, highlightbackground="RED",padx =5, text = "power", command = onof)
     label_1 = tk.Label(window, width= 20, padx = 50, pady = 5, font = ("Arial", 26),text = "Power Off ...", anchor=tk.W)
     label_floor = tk.Label(window, padx = 10, pady = 10,  font=("Arial", 32), text = "1", anchor=tk.W)
+    if floor_num > 0:
+        b1 = tk.Button(window, pady= 15, highlightbackground="WHITE",padx = 10, text = "1", command = lambda: press_button(1,0))
+    if floor_num > 1:
+        b2 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx = 10,text = "2", command = lambda: press_button(2,0))
+    if floor_num > 2:
+        b3 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx = 10, text = "3", command = lambda: press_button(3,0))
+    if floor_num > 3:
+        b4 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx = 10, text = "4", command = lambda: press_button(4,0))    
+    if floor_num > 4:
+        b5 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "5", command = lambda: press_button(5,0))   
+    if floor_num > 5:
+        b6 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "6", command = lambda: press_button(6,0))    
+    if floor_num > 6:
+        b7 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "7", command = lambda: press_button(7,0))    
+    if floor_num > 7:
+        b8 = tk.Button(window, pady = 15, highlightbackground="WHITE",padx =10, text = "8", command = lambda: press_button(8,0))
 
-    canvas2.create_window(430,490, anchor=tk.W, window=b1)
-    canvas2.create_window(350,490, anchor=tk.W, window=b2)
-    canvas2.create_window(430,420, anchor=tk.W, window=b3)
-    canvas2.create_window(350,420, anchor=tk.W, window=b4)
-    canvas2.create_window(430,350, anchor=tk.W, window=b5)
-    canvas2.create_window(350,350, anchor=tk.W, window=b6)
-    canvas2.create_window(430,280, anchor=tk.W, window=b7)
-    canvas2.create_window(350,280, anchor=tk.W, window=b8)
+
+    if floor_num > 0:
+        canvas2.create_window(430,490, anchor=tk.W, window=b1)
+    if floor_num > 1:
+        canvas2.create_window(350,490, anchor=tk.W, window=b2)
+    if floor_num > 2:
+        canvas2.create_window(430,420, anchor=tk.W, window=b3)
+    if floor_num > 3:
+       canvas2.create_window(350,420, anchor=tk.W, window=b4)
+    if floor_num > 4:
+        canvas2.create_window(430,350, anchor=tk.W, window=b5)
+    if floor_num > 5:
+        canvas2.create_window(350,350, anchor=tk.W, window=b6)
+    if floor_num > 6:
+       canvas2.create_window(430,280, anchor=tk.W, window=b7)
+    if floor_num > 7:
+        canvas2.create_window(350,280, anchor=tk.W, window=b8)  
+
+
+
+
+
     canvas2.create_window(430,560, anchor=tk.W, window=bo)
     canvas2.create_window(350,560, anchor=tk.W, window=bc)
     canvas2.create_window(20,560,anchor=tk.W, window=bof)
     canvas2.create_window(50,50, anchor=tk.NW, window=label_1)
     canvas2.create_window(50,120, anchor=tk.NW, window=label_floor)
-    global b_l
-    b_l = [b1,b2,b3,b4,b5,b6,b7,b8]
 
+    global b_l     
+    if floor_num > 0:
+        b_l = [b1]
+    if floor_num > 1:
+        b_l = [b1,b2]
+
+    if floor_num > 2:
+       b_l = [b1,b2,b3]
+    if floor_num > 3:
+        b_l = [b1,b2,b3,b4]
+    if floor_num > 4:
+        b_l = [b1,b2,b3,b4,b5]
+    if floor_num > 5:
+        b_l = [b1,b2,b3,b4,b5,b6]
+    if floor_num > 6:
+        b_l = [b1,b2,b3,b4,b5,b6,b7]
+    if floor_num > 7:
+        b_l = [b1,b2,b3,b4,b5,b6,b7,b8]
     #FSM
     global state_idel_c, state_md_c, state_mu_c,canvas3
     global state_u_stop_c,state_u_open_c,state_u_close_c,state_d_stop_c,state_d_open_c,state_d_close_c, state_power
@@ -520,4 +671,4 @@ def create_gui():
 
 
 if __name__ == "__main__":
-    elevator()
+    elevator(sys.argv)
