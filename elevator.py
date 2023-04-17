@@ -54,7 +54,7 @@ def fsm():
                     button_pushed[current_floor-1] = 0
                     b_l[current_floor-1].configure(highlightbackground="WHITE")
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
-                    b_d[current_floor-1].configure(highlightbackground="WHITE")
+                    b_d[current_floor-2].configure(highlightbackground="WHITE")
 
             if current_state == 0: #state - idle
                 if 1 in [x for x in button_pushed[current_floor:]]:
@@ -70,7 +70,7 @@ def fsm():
                 if button_pushed[current_floor-1] == 1:
                     b_l[current_floor-1].configure(highlightbackground="WHITE")
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
-                    b_d[current_floor-1].configure(highlightbackground="WHITE")
+                    b_d[current_floor-2].configure(highlightbackground="WHITE")
                     current_state = 3
                     button_pushed[current_floor-1] = 0
                     canvas3.itemconfig(state_mu_c, fill="WHITE")
@@ -82,7 +82,7 @@ def fsm():
                 if button_pushed[current_floor-1] == 1:
                     b_l[current_floor-1].configure(highlightbackground="WHITE")
                     b_u[current_floor-1].configure(highlightbackground="WHITE")
-                    b_d[current_floor-1].configure(highlightbackground="WHITE") 
+                    b_d[current_floor-2].configure(highlightbackground="WHITE") 
                     current_state = 4
                     button_pushed[current_floor-1] = 0
                     canvas3.itemconfig(state_md_c, fill="WHITE")
@@ -218,7 +218,7 @@ def press_button(arg,bk):
         case 1:
             b_u[arg-1].configure(highlightbackground="PINK")
         case 2:
-            b_d[arg-1].configure(highlightbackground="PINK")
+            b_d[arg-2].configure(highlightbackground="PINK")
 
 def onof():
     """
